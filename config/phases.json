@@ -1,0 +1,62 @@
+{
+  "settings": {
+    "delay_seconds": 5,
+    "max_words": 150,
+    "breakdown_steps": 3
+  },
+  "phases": [
+    {
+      "id": "init",
+      "name": "Initialization",
+      "steps": [
+        {
+          "id": "clarify",
+          "type": "normal",
+          "prompt_template": "Rewrite the following request more clearly and precisely, keeping the same intent:"
+        },
+        {
+          "id": "decompose",
+          "type": "normal",
+          "prompt_template": "Break the following down into an ordered list of high-level steps:"
+        },
+        {
+          "id": "context",
+          "type": "context",
+          "prompt_template": "Summarize the overall goal of these steps in one sentence."
+        },
+        {
+          "id": "queue",
+          "type": "splittable",
+          "prompt_template": "List each step as a separate line, prefixed with '- '."
+        }
+      ]
+    },
+    {
+      "id": "loop",
+      "name": "Step Loop",
+      "steps": [
+        {
+          "id": "execute",
+          "type": "normal",
+          "prompt_template": "Overall goal: {context}\n\nCarry out this step:"
+        },
+        {
+          "id": "review",
+          "type": "splittable",
+          "prompt_template": "Check the result. If the step is not finished, list the remaining sub-steps, one per line prefixed with '- '."
+        }
+      ]
+    },
+    {
+      "id": "merge",
+      "name": "Merge",
+      "steps": [
+        {
+          "id": "combine",
+          "type": "normal",
+          "prompt_template": "Combine these step results into one coherent result:"
+        }
+      ]
+    }
+  ]
+}

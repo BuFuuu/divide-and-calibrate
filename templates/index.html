@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Divide and Calibrate</title>
+<link rel="icon" type="image/svg+xml" href="/static/icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header>
+  <div id="header-title">
+    <img class="app-icon" src="/static/icon.svg" alt="">
+    <h1>Divide and Calibrate</h1>
+    <p id="header-subtitle">an atelier for a modest mind</p>
+  </div>
+
+  <div id="top-bar">
+    <div id="config-bar">
+      <label>Delay (s)<input type="number" id="cfg-delay" min="0" step="1" value="{{ settings.get('delay_seconds', 0) }}"></label>
+      <label>Words<input type="number" id="cfg-words" min="1" step="1" value="{{ settings.get('max_words', 0) }}"></label>
+      <label title="How many levels deep Auto Run may split (1 = Step 1, 2 = Step 1.1, …)">Breakdown<input type="number" id="cfg-breakdown" min="1" step="1" value="{{ settings.get('breakdown_steps', 0) }}"></label>
+      <button id="cfg-save">Save</button>
+      <span id="cfg-status"></span>
+    </div>
+
+    <label id="init-bar" title="Value of the {init} placeholder (set from the first box's input when it runs)">
+      <span class="brace">{</span>
+      <input type="text" id="init-input" placeholder="init">
+      <span class="brace">}</span>
+    </label>
+
+    <label id="context-bar" title="Value of the {context} placeholder">
+      <span class="brace">{</span>
+      <input type="text" id="context-input" placeholder="context">
+      <span class="brace">}</span>
+    </label>
+
+    <label class="switch-label">
+      <span>Auto Run</span>
+      <input type="checkbox" id="auto-run-toggle">
+      <span class="switch"></span>
+      <span id="auto-run-status"></span>
+    </label>
+  </div>
+
+  <div id="delay-bar" title="Delay before the model call"><div></div></div>
+</header>
+
+<main>
+  <div id="tree">
+    <div class="node root-node" data-node-id="{{ init.id }}">
+      <div class="node-header">
+        <button class="fold-btn" aria-expanded="true" title="Fold">▾</button>
+        <span class="node-title">{{ init.name }}</span>
+        <span class="node-meta"></span>
+      </div>
+      <div class="node-body">
+        <div class="chain">
+          {% for step in init.steps %}
+          <section class="step-box{% if step.type == 'context' %} context-box{% endif %}">
+            <button class="insert-box-btn" title="Insert box here" aria-label="Insert box here">+</button>
+            <div class="step-header">
+              <span class="step-label">{{ step.id }}</span>
+              {% if step.type == 'context' %}
+              <span class="context-tag" title="Running this box sets {context}">→ {context}</span>
+              {% endif %}
+              <div class="box-actions">
+                <button class="run-btn" title="Run">Run</button>
+                {% if step.type == 'splittable' %}
+                <button class="split-btn" title="Split output into steps">Split</button>
+                {% endif %}
+                <button class="remove-btn" title="Remove box" aria-label="Remove box">×</button>
+              </div>
+            </div>
+            <span class="split-status"></span>
+            <textarea class="prompt-field" rows="2" placeholder="Prompt">{{ step.prompt_template }}</textarea>
+            <textarea class="input-field" rows="3" placeholder="Input"></textarea>
+            <textarea class="output-field" rows="3" placeholder="Output"></textarea>
+          </section>
+          {% endfor %}
+        </div>
+        <button class="merge-btn" title="Merge the outputs above into a new panel below (click again to refresh)">Merge</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script id="loop-steps" type="application/json">{{ loop_steps|tojson }}</script>
+<script id="merge-steps" type="application/json">{{ merge_steps|tojson }}</script>
+<script src="/static/app.js"></script>
+</body>
+</html>
